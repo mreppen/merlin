@@ -69,9 +69,12 @@ function! s:RecordType(type)
 # Nvim will complain the cursor is outside of buffer (using cursor from
 # current buffer in the type buffer).
 # So put it to origin and restore it later.
-cw = vim.current.window
-cursor = cw.cursor
-cw.cursor = (1,0)
+version = hasattr(vim, "version") and vim.version
+restore_cursor = version and (version.major, version.minor, version.patch) < (0, 4, 3)
+if restore_cursor:
+    cw = vim.current.window
+    cursor = cw.cursor
+    cw.cursor = (1,0)
 
 idx = int(vim.eval("g:merlin_type_history"))
 typ = vim.eval("a:type")
@@ -95,7 +98,8 @@ else:
 
 # Note that this leaves a blank line at the beginning of the buffer, but
 # it is apparently the desired behavior.
-cw.cursor = cursor
+if restore_cursor:
+    cw.cursor = cursor
 EOF
 
   call winrestview(l:view)
